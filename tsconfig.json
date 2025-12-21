@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "module": "NodeNext",          // Required for modern Node.js
+    "moduleResolution": "NodeNext",// Must match module setting
+    "target": "ESNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "verbatimModuleSyntax": true,  // Keep this for strict type-only imports
+    "isolatedModules": true
+  }
+}
