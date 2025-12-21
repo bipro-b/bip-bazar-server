@@ -2,6 +2,7 @@
 import type { Request, Response, NextFunction } from 'express';
 
 const Product = require("../models/Product");
+const Category = require("../models/Category");
 const ProductService = require("../services/productService");
 
 /**
@@ -26,6 +27,7 @@ exports.getAllProducts = async (req: Request, res: Response, next: NextFunction)
 // Using 'any' for req because we add 'user' to it in our custom auth middleware
 exports.createProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
+        // 1. Logic for URL-friendly slug
         if (req.body.name && !req.body.slug) {
             req.body.slug = req.body.name
                 .toLowerCase()
@@ -33,6 +35,15 @@ exports.createProduct = async (req: any, res: Response, next: NextFunction) => {
                 .replace(/ +/g, '-');
         }
 
+        // 2. Marketplace Security: Verify Category exists
+        if (req.body.category) {
+            const categoryExists = await Category.findById(req.body.category);
+            if (!categoryExists) {
+                return res.status(400).json({ success: false, message: "Invalid Category ID" });
+            }
+        }
+
+        // 3. Attach logged-in seller ID
         const productData = { 
             ...req.body, 
             seller: req.user?.id 

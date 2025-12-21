@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const productController = require("../controllers/productController");
-
+const { protect, authorize } = require("../middlewares/authMiddleware"); // IMPORT THIS
 /**
  * IMPORT MIDDLEWARES
  * Note: You will need to create 'protect' and 'authorize' to 
@@ -21,8 +21,8 @@ router.get("/", productController.getAllProducts);
 // Using 'protect' ensures req.user.id is available for the controller
 router.post(
     "/", 
-    // protect, 
-    // authorize('seller', 'admin'), 
+    protect, 
+    authorize('seller'), 
     productController.createProduct
 );
 
@@ -53,3 +53,4 @@ router
     );
 
 module.exports = router;
+

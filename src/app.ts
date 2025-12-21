@@ -20,8 +20,10 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 const productRoutes = require("./routes/productRoute");
+const userRoutes = require("./routes/userRoute");
 
 // ... other middlewares
 app.use("/api/products", productRoutes);
+app.use("/api/users",userRoutes);
 
 module.exports=app;
