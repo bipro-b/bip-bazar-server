@@ -19,4 +19,9 @@ app.get('/', (req: Request, res: Response) => {
   res.send('BIP BAZAR Multi-Tenant API is Running 🚀');
 });
 
+const productRoutes = require("./routes/productRoute");
+
+// ... other middlewares
+app.use("/api/products", productRoutes);
+
 module.exports=app;
