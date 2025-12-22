@@ -21,9 +21,11 @@ app.get('/', (req: Request, res: Response) => {
 
 const productRoutes = require("./routes/productRoute");
 const userRoutes = require("./routes/userRoute");
+const categoryRoutes = require("./routes/categoryRoute");
 
 // ... other middlewares
 app.use("/api/products", productRoutes);
 app.use("/api/users",userRoutes);
+app.use("/api/categories",categoryRoutes);
 
 module.exports=app;
