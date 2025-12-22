@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 const UserService = require("../services/userService");
-
+const User = require("../models/User")
 exports.register = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = await UserService.registerUser(req.body);
@@ -52,6 +52,39 @@ exports.getAllUsers = async (req: Request, res: Response, next: NextFunction) =>
             count: data.users.length,
             ...data 
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.verifyOTP = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const { code, type } = req.body; // type: 'email' or 'phone'
+        const user = await User.findById(req.user.id);
+
+        if (!user || user.verificationMethods.otp.code !== code) {
+            return res.status(400).json({ success: false, message: "Invalid OTP code" });
+        }
+
+        if (new Date() > user.verificationMethods.otp.expiresAt) {
+            return res.status(400).json({ success: false, message: "OTP has expired" });
+        }
+
+        // Update verification status based on type
+        if (type === 'email') {
+            user.verificationMethods.emailVerified = true;
+        } else if (type === 'phone') {
+            user.verificationMethods.phoneVerified = true;
+        }
+
+        // If both are verified (or just the required one), mark user as verified
+        user.isVerified = true; 
+        
+        // Clear OTP after use
+        user.verificationMethods.otp = undefined;
+        await user.save();
+
+        res.status(200).json({ success: true, message: `${type} verified successfully` });
     } catch (error) {
         next(error);
     }

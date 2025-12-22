@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
+const { protect, authorize } = require("../middlewares/authMiddleware"); 
 
 /**
  * IMPORT MIDDLEWARES
@@ -37,6 +38,14 @@ router.get(
     "/all",
     userController.getAllUsers
 )
+
+router.post(
+    "/verify-otp", 
+    protect, 
+    authorize('seller'), 
+    userController.verifyOTP
+);
+
 /**
  * @ROUTE   GET /api/users/admin/all
  * @DESC    Get all users for marketplace management

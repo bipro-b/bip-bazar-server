@@ -42,8 +42,8 @@ router.post(
 router
     .route("/:id")
     .patch(
-        // protect, 
-        // authorize('seller', 'admin'), 
+        protect, 
+        authorize('seller', 'admin'), 
         productController.updateProduct
     )
     .delete(
@@ -51,6 +51,14 @@ router
         // authorize('seller', 'admin'), 
         productController.deleteProduct
     );
+
+
+router.get(
+    "/seller/me", 
+    protect, 
+    authorize('seller'), 
+    productController.getSellerProducts
+);
 
 module.exports = router;
 

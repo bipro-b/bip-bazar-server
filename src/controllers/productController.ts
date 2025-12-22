@@ -67,7 +67,7 @@ exports.createProduct = async (req: any, res: Response, next: NextFunction) => {
 exports.updateProduct = async (req: any, res: Response, next: NextFunction) => {
     try {
         let query: Record<string, any> = { _id: req.params.id };
-        if (req.user?.role !== 'admin') {
+        if (req.user?.role !== 'admin' || req.user?.role !== 'seller') {
             query.seller = req.user?.id;
         }
 
@@ -123,6 +123,40 @@ exports.deleteProduct = async (req: any, res: Response, next: NextFunction) => {
         }
 
         res.status(200).json({ success: true, message: "Product removed" });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+/**
+ * @desc    Get all products belonging to the logged-in seller (All statuses)
+ * @route   GET /api/products/seller/me
+ * @access  Private/Seller
+ */
+exports.getSellerProducts = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const Product = require("../models/Product");
+        
+        // 1. Filter strictly by the logged-in seller's ID
+        // Unlike the public route, we do NOT filter by status: 'active' here.
+        const query: Record<string, any> = { seller: req.user.id };
+
+        // 2. Add optional status filtering if provided in query params (e.g., ?status=pending)
+        if (req.query.status) {
+            query.status = req.query.status;
+        }
+
+        const products = await Product.find(query)
+            .populate('category', 'name')
+            .sort({ createdAt: -1 }) // Show newest products first
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
     } catch (error) {
         next(error);
     }
