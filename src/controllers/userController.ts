@@ -59,9 +59,18 @@ exports.getAllUsers = async (req: Request, res: Response, next: NextFunction) =>
 
 exports.verifyOTP = async (req: any, res: Response, next: NextFunction) => {
     try {
+
+        console.log(req.body);
+
+        if (!req.body || !req.body.code) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Please provide the OTP code" 
+            });
+        }
         const { code, type } = req.body; // type: 'email' or 'phone'
         const user = await User.findById(req.user.id);
-
+        console.log(user);
         if (!user || user.verificationMethods.otp.code !== code) {
             return res.status(400).json({ success: false, message: "Invalid OTP code" });
         }
@@ -85,6 +94,45 @@ exports.verifyOTP = async (req: any, res: Response, next: NextFunction) => {
         await user.save();
 
         res.status(200).json({ success: true, message: `${type} verified successfully` });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+exports.requestPhoneOTP = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        // req.user is available from 'protect' middleware
+        const otp = await UserService.generateOTP(req.user.id);
+        
+        console.log(otp);
+        res.status(200).json({ 
+            success: true, 
+            message: "OTP sent to your registered phone number" 
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+exports.getMe = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        // Find user by ID from the 'protect' middleware
+        // .select("-password") ensures we don't send the hashed password to the frontend
+        const user = await User.findById(req.user.id).select("-password -verificationMethods.otp");
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: user
+        });
     } catch (error) {
         next(error);
     }

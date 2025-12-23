@@ -30,7 +30,7 @@ router.post("/login", userController.login);
  */
 router.get(
     "/profile", 
-    // protect, 
+    protect, 
     userController.getProfile
 );
 
@@ -39,12 +39,26 @@ router.get(
     userController.getAllUsers
 )
 
+
+router.get(
+    "/req-otp", 
+    protect, 
+    authorize('seller','customer','admin'), 
+    userController.requestPhoneOTP
+);
+
+
+
 router.post(
     "/verify-otp", 
     protect, 
-    authorize('seller'), 
+    authorize('seller','customer','admin'), 
     userController.verifyOTP
 );
+
+
+router.get("/customer/profile", protect, userController.getMe);
+
 
 /**
  * @ROUTE   GET /api/users/admin/all

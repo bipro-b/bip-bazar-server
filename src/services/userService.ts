@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { sendSMS } = require("../utils/smsSender");
 
 const UserService = {
     /**
@@ -44,6 +45,25 @@ const UserService = {
         return { user, token };
     },
 
+    async generateOTP(userId: string) {
+        const user = await User.findById(userId);
+        if (!user) throw new Error("User not found");
+
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        // Save to DB
+        await User.findByIdAndUpdate(userId, {
+            "verificationMethods.otp": { code: otpCode, expiresAt }
+        });
+
+        // Send the actual SMS (using your utility)
+        const message = `Your Bip-Bazar verification code is: ${otpCode}. Valid for 10 mins.`;
+        await sendSMS(user.phoneNumber, message);
+
+        return otpCode;
+    },
+
     /**
      * Advanced Admin Query
      * Filter by role, verification status, or membership level
@@ -66,15 +86,7 @@ const UserService = {
     
 };
 
-exports.generateOTP = async (userId: string) => {
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 mins
 
-    await User.findByIdAndUpdate(userId, {
-        "verificationMethods.otp": { code: otpCode, expiresAt }
-    });
 
-    return otpCode;
-};
 
 module.exports = UserService;

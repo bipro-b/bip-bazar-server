@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const interactionSchema = new mongoose.Schema({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', index: true },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    type: { type: String, enum: ['view', 'click', 'add_to_cart'], required: true },
+    type: { type: String, enum: ['view', 'click', 'add_to_cart','ordered'], required: true },
     source: { type: String, enum: ['search', 'organic', 'sponsored', 'home_page'] },
     metadata: {
         ip: String,
